@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { upload } from "../middlewares/upload";
-import { createBlogController, getBlogDetailController, getBlogsController, updateBlogController } from "../controllers/blogControllers";
+import { createBlogController, deleteBlogController, getBlogDetailController, getBlogsController, updateBlogController } from "../controllers/blogControllers";
 import { createBlogValidator } from "../validators/blogValidator";
 import { validateRequest } from "../middlewares/validateRequest";
 
@@ -17,4 +17,6 @@ router.patch(
   validateRequest,
   updateBlogController
 );
+router.delete("/:id", deleteBlogController);
+
 export default router;

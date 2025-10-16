@@ -111,3 +111,33 @@ export const updateBlogController = async (req: Request, res: Response) => {
     res.status(500).json({ error: "Error updating blog" });
   }
 };
+
+// Delete blog
+export const deleteBlogController = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    // Find the blog by ID
+    const blog = await Blog.findByPk(id);
+    if (!blog) {
+      return res.status(404).json({ error: "Blog not found" });
+    }
+
+    // Delete cover image file if exists
+    if (blog.coverImage) {
+      const imagePath = path.join(process.cwd(), blog.coverImage);
+      if (fs.existsSync(imagePath)) {
+        fs.unlinkSync(imagePath);
+      }
+    }
+
+    // Delete the blog record from the database
+    await blog.destroy();
+
+    res.status(200).json({ message: "Blog deleted successfully" });
+  } catch (error: any) {
+    console.error("❌ Error deleting blog:", error);
+    res.status(500).json({ error: "Error deleting blog" });
+  }
+};
+

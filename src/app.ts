@@ -21,7 +21,26 @@ app.use(express.json());
 
 app.use("/api/auth", authRoutes);
 
-app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
+// app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
+// app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
+app.use(
+  "/uploads",
+  cors({
+    origin: [
+      "http://localhost:3000",
+      "http://192.168.100.4:3000",
+      "https://yourdomain.com"
+    ],
+    methods: ["GET"],
+  }),
+  (req, res, next) => {
+    res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
+    next();
+  },
+  express.static(path.join(__dirname, "../uploads"))
+);
+
+
 
 app.use("/api/blogs", blogRoutes);
 // app.use("/api/banners", bannerRoutes);
