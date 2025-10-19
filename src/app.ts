@@ -6,8 +6,10 @@ import morgan from "morgan";
 import compression from "compression";
 import authRoutes from "./routes/authRoutes";
 import blogRoutes from "./routes/blogRoutes";
+import bannerRoutes from "./routes/bannerRoutes";
+import userRoutes from "./routes/userRoutes";
+import packagesRoutes from "./routes/packageRoutes";
 import path from "path";
-// import bannerRoutes from "./routes/bannerRoutes";
 // import { errorMiddleware } from "./middlewares/errorMiddleware";
 
 const app = express();
@@ -43,7 +45,11 @@ app.use(
 
 
 app.use("/api/blogs", blogRoutes);
-// app.use("/api/banners", bannerRoutes);
+app.use("/api/banners", bannerRoutes);
+app.use("/api/users", userRoutes);
+app.use("/api/packages", packagesRoutes);
+
+
 
 // app.use(errorMiddleware);
 

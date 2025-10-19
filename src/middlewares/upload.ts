@@ -2,19 +2,34 @@ import multer from "multer";
 import path from "path";
 import fs from "fs";
 
-const uploadDir = path.join(process.cwd(), "uploads");
+const baseDir = path.join(process.cwd(), "uploads");
 
-// Ensure uploads folder exists
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
+// Ensure base upload directory exists
+if (!fs.existsSync(baseDir)) {
+  fs.mkdirSync(baseDir, { recursive: true });
 }
 
-const storage = multer.diskStorage({
-  destination: (_, __, cb) => cb(null, uploadDir),
-  filename: (_, file, cb) => {
-    const unique = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    cb(null, unique + path.extname(file.originalname));
-  },
-});
+// Helper to create subfolder safely
+const ensureSubDir = (folderName: string) => {
+  const subDir = path.join(baseDir, folderName);
+  if (!fs.existsSync(subDir)) {
+    fs.mkdirSync(subDir, { recursive: true });
+  }
+  return subDir;
+};
 
-export const upload = multer({ storage });
+// Factory function for specific folders (e.g. banners, blogs, packages)
+export const createUpload = (folderName: string) => {
+  const storage = multer.diskStorage({
+    destination: (_, __, cb) => {
+      const uploadDir = ensureSubDir(folderName);
+      cb(null, uploadDir);
+    },
+    filename: (_, file, cb) => {
+      const unique = Date.now() + "-" + Math.round(Math.random() * 1e9);
+      cb(null, unique + path.extname(file.originalname));
+    },
+  });
+
+  return multer({ storage });
+};

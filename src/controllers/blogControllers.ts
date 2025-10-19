@@ -7,7 +7,7 @@ import path from "path";
 export const createBlogController = async (req: Request, res: Response) => {
   try {
     const { title, content } = req.body;
-    const coverImage = req.file ? `/uploads/${req.file.filename}` : null;
+    const coverImage = req.file ? `/uploads/blogs/${req.file.filename}` : null;
 
     if (!title || !content) {
       return res.status(400).json({ error: "Title and content are required" });
@@ -40,13 +40,15 @@ await newBlog.update({ slug });
 // Get all blogs (sorted newest first)
 export const getBlogsController = async (req: Request, res: Response) => {
   try {
+    const latest = req.query.latest === "true"; // optional query to fetch only latest
     const blogs = await Blog.findAll({
       order: [["createdAt", "DESC"]],
+      ...(latest && { limit: 3 }),
     });
-    res.json(blogs);
-  } catch (error: any) {
-    console.error("❌ Error getting blogs:", error);
-    res.status(500).json({ error: "Error getting blogs" });
+    res.status(200).json(blogs);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
   }
 };
 
@@ -80,12 +82,12 @@ export const updateBlogController = async (req: Request, res: Response) => {
     if (req.file) {
       // Delete old file if exists
       if (blog.coverImage) {
-        const oldImagePath = path.join(process.cwd(), blog.coverImage);
+        const oldImagePath = path.join(process.cwd(), "uploads", "blogs", path.basename(blog.coverImage));
         if (fs.existsSync(oldImagePath)) {
           fs.unlinkSync(oldImagePath);
         }
       }
-      coverImage = `/uploads/${req.file.filename}`;
+      coverImage = `/uploads/blogs/${req.file.filename}`;
     }
 
     // Update slug if title changed, append -id to ensure uniqueness
@@ -125,7 +127,7 @@ export const deleteBlogController = async (req: Request, res: Response) => {
 
     // Delete cover image file if exists
     if (blog.coverImage) {
-      const imagePath = path.join(process.cwd(), blog.coverImage);
+      const imagePath = path.join(process.cwd(), "uploads", "blogs", path.basename(blog.coverImage));
       if (fs.existsSync(imagePath)) {
         fs.unlinkSync(imagePath);
       }

@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { upload } from "../middlewares/upload";
+import { createUpload } from "../middlewares/upload";
 import { createBlogController, deleteBlogController, getBlogDetailController, getBlogsController, updateBlogController } from "../controllers/blogControllers";
 import { createBlogValidator } from "../validators/blogValidator";
 import { validateRequest } from "../middlewares/validateRequest";
@@ -7,12 +7,15 @@ import { validateRequest } from "../middlewares/validateRequest";
 
 const router = Router();
 
+const blogUpload = createUpload("blogs");
+
+
 router.get("/", getBlogsController);
 router.get("/:slug", getBlogDetailController);
-router.post("/", upload.single("coverImage"),createBlogValidator, validateRequest, createBlogController);
+router.post("/", blogUpload.single("coverImage"),createBlogValidator, validateRequest, createBlogController);
 router.patch(
   "/:id",
-  upload.single("coverImage"),
+  blogUpload.single("coverImage"),
   createBlogValidator, // you can use same validator for title/content
   validateRequest,
   updateBlogController
