@@ -35,8 +35,8 @@ export const createPackageValidator = [
       throw new Error("Only JPG, PNG, and WEBP images are allowed");
     }
 
-    // Limit size (optional): 2MB max
-    const MAX_SIZE = 2 * 1024 * 1024;
+    // Limit size (optional): 10MB max
+    const MAX_SIZE = 10 * 1024 * 1024;
     if (file.size > MAX_SIZE) {
       throw new Error("Image must be smaller than 2MB");
     }

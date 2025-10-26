@@ -9,6 +9,8 @@ import blogRoutes from "./routes/blogRoutes";
 import bannerRoutes from "./routes/bannerRoutes";
 import userRoutes from "./routes/userRoutes";
 import packagesRoutes from "./routes/packageRoutes";
+import contactsRoutes from "./routes/contactsRoutes";
+
 import path from "path";
 // import { errorMiddleware } from "./middlewares/errorMiddleware";
 
@@ -48,6 +50,7 @@ app.use("/api/blogs", blogRoutes);
 app.use("/api/banners", bannerRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/packages", packagesRoutes);
+app.use("/api/contacts", contactsRoutes);
 
 
 

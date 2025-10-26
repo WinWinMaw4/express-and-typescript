@@ -3,6 +3,7 @@ import { Request, Response } from "express";
 import Blog from "../models/blog";
 import { generateSlug } from "../utils/slugify";
 import path from "path";
+import { Op } from "sequelize";
 
 export const createBlogController = async (req: Request, res: Response) => {
   try {
@@ -37,20 +38,55 @@ await newBlog.update({ slug });
   }
 };
 
-// Get all blogs (sorted newest first)
+
+// Get all blogs (sorted newest first) with optional pagination & search
 export const getBlogsController = async (req: Request, res: Response) => {
   try {
-    const latest = req.query.latest === "true"; // optional query to fetch only latest
-    const blogs = await Blog.findAll({
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const offset = (page - 1) * limit;
+
+    const search = (req.query.search as string) || "";
+    const latest = req.query.latest === "true";
+
+    // If it's a latest request → no pagination but still allow search (optional)
+    if (latest) {
+      const blogs = await Blog.findAll({
+        where: search
+          ? { title: { [Op.iLike]: `%${search}%` } }
+          : undefined,
+        order: [["createdAt", "DESC"]],
+        limit: 3,
+      });
+      return res.status(200).json({ blogs });
+    }
+
+    // Pagination request
+    const whereCondition = search
+      ? { title: { [Op.iLike]: `%${search}%` } }
+      : undefined;
+
+    const { count, rows: blogs } = await Blog.findAndCountAll({
+      where: whereCondition,
       order: [["createdAt", "DESC"]],
-      ...(latest && { limit: 3 }),
+      limit,
+      offset,
     });
-    res.status(200).json(blogs);
+
+    const totalPages = Math.ceil(count / limit);
+
+    res.status(200).json({
+      totalPages,
+      currentPage: page,
+      totalItems: count,
+      blogs,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server error" });
   }
 };
+
 
 // Get blog detail by slug
 export const getBlogDetailController = async (req: Request, res: Response) => {
